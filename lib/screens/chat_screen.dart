@@ -32,18 +32,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final _firestore = FirebaseFirestore.instance;
   static String snapshot = '';
-  Future<String> getFriends() async {
+  void getFriends() async {
     final data =
         await _firestore.collection('users').doc('yK2sZENWGdfOuXaTQ8Dj').get();
     setState(() {
       snapshot = data['user'].toString();
     });
-    await for (var snapshot in _firestore.collection('Users').snapshots()) {
-      for (var friend in snapshot.docs) {
-        print(friend.data()['user']);
-      }
-    }
-    return snapshot;
   }
 
   late String message;
@@ -56,9 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             GestureDetector(
               child: ChatLogo(chatFontSize: 0),
-              onTap: () {
-                print(snapshot);
-              },
+              onTap: () {},
             ),
             Text(
               snapshot,
@@ -99,6 +91,9 @@ class _ChatScreenState extends State<ChatScreen> {
               IconButton(
                 onPressed: () {
                   print(message);
+                  _firestore
+                      .collection('messages')
+                      .add({'message': message, 'sender': loggedInUser.email});
                 },
                 icon: Icon(Icons.arrow_forward_outlined),
                 color: Colors.blue,
