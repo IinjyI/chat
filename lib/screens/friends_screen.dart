@@ -39,6 +39,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             ChatLogo(chatFontSize: 20),
             Text(
@@ -52,9 +53,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 onPressed: () {
                   Navigator.pushNamed(context, WelcomeScreen.id);
                 },
-                child: Text(
-                  'Sign out',
-                  style: TextStyle(color: Colors.red, fontSize: 10),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 7.0),
+                  child: Text(
+                    'Sign out',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
                 ))
           ],
         ),
