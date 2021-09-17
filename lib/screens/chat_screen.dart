@@ -42,7 +42,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   late String message;
-
+  final textController = TextEditingController();
   void messagesStream() async {
     await for (var snapshot in _firestore.collection('messages').snapshots()) {
       for (var message in snapshot.docs) {
@@ -102,18 +102,32 @@ class _ChatScreenState extends State<ChatScreen> {
                     final messageSender = message.get('sender');
                     final messageWidget = Container(
                       margin: EdgeInsets.all(7),
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(messageSender),
+                          SizedBox(height: 4),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.blueAccent,
+                            ),
+                            child: Text(
+                              '$messageText',
+                              style: TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                          )
+                        ],
                       ),
-                      child: Text('$messageSender\n$messageText',
-                          style: TextStyle(
-                            fontSize: 20,
-                          )),
                     );
                     messagesList.add(messageWidget);
                   }
-                  return Column(children: messagesList);
+                  return ListView(
+                    children: messagesList,
+                  );
                 } else {
                   return LoadingOverlay(
                     isLoading: true,
@@ -128,6 +142,7 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Flexible(
                 child: TextField(
+                  controller: textController,
                   onChanged: (value) {
                     message = value;
                   },
@@ -135,7 +150,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               IconButton(
                 onPressed: () {
-                  print(message);
+                  textController.clear();
                   _firestore
                       .collection('messages')
                       .add({'message': message, 'sender': loggedInUser.email});
