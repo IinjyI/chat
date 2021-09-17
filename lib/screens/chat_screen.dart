@@ -9,6 +9,9 @@ import 'package:loading_overlay/loading_overlay.dart';
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
   static const String id = 'ChatScreen';
+  static late String friendUsername;
+  static late String friendEmail;
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -18,7 +21,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     getCurrentUser();
-    getFriends();
   }
 
   final _auth = FirebaseAuth.instance;
@@ -33,23 +35,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final _firestore = FirebaseFirestore.instance;
   static String user = '';
-  void getFriends() async {
-    final data =
-        await _firestore.collection('users').doc('yK2sZENWGdfOuXaTQ8Dj').get();
-    setState(() {
-      user = data['user'].toString();
-    });
-  }
 
   late String message;
   final textController = TextEditingController();
-  void messagesStream() async {
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
-      for (var message in snapshot.docs) {
-        print(message.data);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,28 +46,24 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            GestureDetector(
-              child: ChatLogo(chatFontSize: 0),
-              onTap: () {},
-            ),
-            Text(
-              user,
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueGrey[400]),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 55),
-              child: GestureDetector(
-                child: Icon(
-                  Icons.perm_contact_cal,
-                  size: 35,
-                ),
-                onTap: () {
-                  Navigator.pushNamed(context, FriendsScreen.id);
-                },
+            ChatLogo(chatFontSize: 0),
+            Center(
+              child: Text(
+                ChatScreen.friendUsername,
+                style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey[400]),
               ),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.perm_contact_cal,
+                size: 35,
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, FriendsScreen.id);
+              },
             ),
           ],
         ),
@@ -100,57 +84,61 @@ class _ChatScreenState extends State<ChatScreen> {
                   for (var message in messages) {
                     final messageText = message.get('message');
                     final messageSender = message.get('sender');
+                    final messageReceiver = message.get('receiver');
                     late final messageWidget;
-                    if (messageSender == loggedInUser.email) {
-                      messageWidget = Container(
-                        margin: EdgeInsets.all(7),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(messageSender),
-                            SizedBox(height: 4),
-                            Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors.blueAccent,
-                              ),
-                              child: Text(
-                                '$messageText',
-                                style: TextStyle(
-                                  fontSize: 20,
+                    if ((messageReceiver == ChatScreen.friendEmail) &&
+                        (messageSender == loggedInUser.email)) {
+                      if (messageSender == loggedInUser.email) {
+                        messageWidget = Container(
+                          margin: EdgeInsets.all(7),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(messageSender),
+                              SizedBox(height: 4),
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Colors.blueAccent,
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
-                      );
-                    } else if (messageSender != loggedInUser.email) {
-                      messageWidget = Container(
-                        margin: EdgeInsets.all(7),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(messageSender),
-                            SizedBox(height: 4),
-                            Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors.blueGrey,
-                              ),
-                              child: Text(
-                                '$messageText',
-                                style: TextStyle(
-                                  fontSize: 20,
+                                child: Text(
+                                  '$messageText',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  ),
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
-                      );
+                              )
+                            ],
+                          ),
+                        );
+                      } else if (messageSender != loggedInUser.email) {
+                        messageWidget = Container(
+                          margin: EdgeInsets.all(7),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(messageSender),
+                              SizedBox(height: 4),
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Colors.blueGrey,
+                                ),
+                                child: Text(
+                                  '$messageText',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      }
+                      messagesList.add(messageWidget);
                     }
-                    messagesList.add(messageWidget);
                   }
                   return ListView(
                     children: messagesList,
@@ -178,9 +166,11 @@ class _ChatScreenState extends State<ChatScreen> {
               IconButton(
                 onPressed: () {
                   textController.clear();
-                  _firestore
-                      .collection('messages')
-                      .add({'message': message, 'sender': loggedInUser.email});
+                  _firestore.collection('messages').add({
+                    'message': message,
+                    'sender': loggedInUser.email,
+                    'receiver': ChatScreen.friendEmail
+                  });
                 },
                 icon: Icon(Icons.arrow_forward_outlined),
                 color: Colors.blue,

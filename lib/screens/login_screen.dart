@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
+import 'friends_screen.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
   static const String id = 'LoginScreen';
@@ -78,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       loading = false;
                     });
                     if (newUser != null) {
-                      Navigator.pushNamed(context, ChatScreen.id);
+                      Navigator.pushNamed(context, FriendsScreen.id);
                     }
                   }),
             ),

@@ -1,3 +1,4 @@
+import 'package:chat/screens/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import '../custom_widgets.dart';
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
   static const String id = 'FriendsScreen';
+
   @override
   _FriendsScreenState createState() => _FriendsScreenState();
 }
@@ -62,17 +64,26 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 final friendEmail = user.get('email');
                 late final FriendWidget;
                 if (friendEmail != loggedInUser.email) {
-                  FriendWidget = Container(
-                    margin: EdgeInsets.all(7),
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Colors.blueGrey[800],
-                    ),
-                    child: Text(
-                      friend,
-                      style: TextStyle(
-                        fontSize: 20,
+                  FriendWidget = GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        ChatScreen.friendUsername = friend;
+                        ChatScreen.friendEmail = friendEmail;
+                      });
+                      Navigator.pushNamed(context, ChatScreen.id);
+                    },
+                    child: Container(
+                      margin: EdgeInsets.all(7),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.blueGrey[800],
+                      ),
+                      child: Text(
+                        friend,
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                   );

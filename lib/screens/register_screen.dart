@@ -6,6 +6,8 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'friends_screen.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
   static const String id = 'RegisterScreen';
@@ -98,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       loading = false;
                     });
                     if (newUser != null) {
-                      Navigator.pushNamed(context, ChatScreen.id);
+                      Navigator.pushNamed(context, FriendsScreen.id);
                     }
                   }),
             ),
