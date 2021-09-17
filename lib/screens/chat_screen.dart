@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/custom_widgets.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -31,16 +32,25 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   final _firestore = FirebaseFirestore.instance;
-  static String snapshot = '';
+  static String user = '';
   void getFriends() async {
     final data =
         await _firestore.collection('users').doc('yK2sZENWGdfOuXaTQ8Dj').get();
     setState(() {
-      snapshot = data['user'].toString();
+      user = data['user'].toString();
     });
   }
 
   late String message;
+
+  void messagesStream() async {
+    await for (var snapshot in _firestore.collection('messages').snapshots()) {
+      for (var message in snapshot.docs) {
+        print(message.data);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onTap: () {},
             ),
             Text(
-              snapshot,
+              user,
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -76,8 +86,43 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: Container(color: Colors.white60)),
+          Expanded(
+              child: Container(
+            color: Colors.white60,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('messages').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final messages = snapshot.data!.docs;
+                  List<Widget> messagesList = [];
+                  for (var message in messages) {
+                    final messageText = message.get('message');
+                    final messageSender = message.get('sender');
+                    final messageWidget = Container(
+                      margin: EdgeInsets.all(7),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent,
+                      ),
+                      child: Text('$messageSender\n$messageText',
+                          style: TextStyle(
+                            fontSize: 20,
+                          )),
+                    );
+                    messagesList.add(messageWidget);
+                  }
+                  return Column(children: messagesList);
+                } else {
+                  return LoadingOverlay(
+                    isLoading: true,
+                    child: Container(color: Colors.blueGrey),
+                  );
+                }
+              },
+            ),
+          )),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
