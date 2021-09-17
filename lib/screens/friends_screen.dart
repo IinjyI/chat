@@ -1,4 +1,5 @@
 import 'package:chat/screens/chat_screen.dart';
+import 'package:chat/screens/welcome_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,17 +40,22 @@ class _FriendsScreenState extends State<FriendsScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            GestureDetector(
-              child: ChatLogo(chatFontSize: 20),
-              onTap: () {},
-            ),
+            ChatLogo(chatFontSize: 20),
             Text(
               ' Friends',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.blueGrey[400],
                   fontSize: 20),
-            )
+            ),
+            TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, WelcomeScreen.id);
+                },
+                child: Text(
+                  'Sign out',
+                  style: TextStyle(color: Colors.red, fontSize: 10),
+                ))
           ],
         ),
       ),

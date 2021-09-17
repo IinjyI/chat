@@ -86,8 +86,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     final messageSender = message.get('sender');
                     final messageReceiver = message.get('receiver');
                     late final messageWidget;
-                    if ((messageReceiver == ChatScreen.friendEmail) &&
-                        (messageSender == loggedInUser.email)) {
+                    if (((messageReceiver == ChatScreen.friendEmail) &&
+                            (messageSender == loggedInUser.email)) ||
+                        ((messageSender == ChatScreen.friendEmail) &&
+                            (messageReceiver == loggedInUser.email))) {
                       if (messageSender == loggedInUser.email) {
                         messageWidget = Container(
                           margin: EdgeInsets.all(7),
