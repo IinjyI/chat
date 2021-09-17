@@ -78,7 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
               stream: _firestore.collection('messages').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  final messages = snapshot.data!.docs;
+                  final messages = snapshot.data!.docs.reversed;
                   List<Widget> messagesList = [];
                   for (var message in messages) {
                     final messageText = message.get('message');
