@@ -100,29 +100,56 @@ class _ChatScreenState extends State<ChatScreen> {
                   for (var message in messages) {
                     final messageText = message.get('message');
                     final messageSender = message.get('sender');
-                    final messageWidget = Container(
-                      margin: EdgeInsets.all(7),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(messageSender),
-                          SizedBox(height: 4),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.blueAccent,
-                            ),
-                            child: Text(
-                              '$messageText',
-                              style: TextStyle(
-                                fontSize: 20,
+                    late final messageWidget;
+                    if (messageSender == loggedInUser.email) {
+                      messageWidget = Container(
+                        margin: EdgeInsets.all(7),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(messageSender),
+                            SizedBox(height: 4),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.blueAccent,
                               ),
-                            ),
-                          )
-                        ],
-                      ),
-                    );
+                              child: Text(
+                                '$messageText',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    } else if (messageSender != loggedInUser.email) {
+                      messageWidget = Container(
+                        margin: EdgeInsets.all(7),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(messageSender),
+                            SizedBox(height: 4),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.blueGrey,
+                              ),
+                              child: Text(
+                                '$messageText',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    }
                     messagesList.add(messageWidget);
                   }
                   return ListView(
