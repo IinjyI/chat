@@ -52,6 +52,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, WelcomeScreen.id);
+                  _auth.signOut();
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(left: 7.0),
