@@ -74,6 +74,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 final friend = user.get('user');
                 final friendEmail = user.get('email');
                 late final FriendWidget;
+                late final myUsername;
                 if (friendEmail != loggedInUser.email) {
                   FriendWidget = GestureDetector(
                     onTap: () {
@@ -100,6 +101,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   );
                   friendsList.add(FriendWidget);
                 } else if (friendEmail == loggedInUser.email) {
+                  myUsername = user.get('user');
+                  ChatScreen.myUsername = myUsername;
                   FriendWidget = Container(
                     margin: EdgeInsets.all(7),
                     padding: EdgeInsets.all(10),
@@ -108,7 +111,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       color: Colors.blueGrey[800],
                     ),
                     child: Text(
-                      'You!',
+                      '$myUsername (You!)',
                       style: TextStyle(
                         fontSize: 20,
                       ),

@@ -11,6 +11,7 @@ class ChatScreen extends StatefulWidget {
   static const String id = 'ChatScreen';
   static late String friendUsername;
   static late String friendEmail;
+  static late String myUsername;
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -20,20 +21,14 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    setState(() {
+      loggedInUser = _auth.currentUser!;
+    });
   }
 
   final _auth = FirebaseAuth.instance;
-  late User loggedInUser;
-  void getCurrentUser() async {
-    final user = await _auth.currentUser;
-
-    if (user != null) {
-      loggedInUser = user;
-    }
-  }
-
-  final _firestore = FirebaseFirestore.instance;
+  late final User loggedInUser;
+  late final _firestore = FirebaseFirestore.instance;
 
   late String message;
   final textController = TextEditingController();
@@ -76,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection(
-                      'messagesFrom ${loggedInUser.email} to ${ChatScreen.friendEmail}')
+                      'messages of ${(ChatScreen.friendUsername.length + ChatScreen.myUsername.length)}')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -85,63 +80,58 @@ class _ChatScreenState extends State<ChatScreen> {
                   for (var message in messages) {
                     final messageText = message.get('message');
                     final messageSender = message.get('sender');
-                    final messageReceiver = message.get('receiver');
                     late final messageWidget;
-                    if (((messageReceiver == ChatScreen.friendEmail) &&
-                            (messageSender == loggedInUser.email)) ||
-                        ((messageSender == ChatScreen.friendEmail) &&
-                            (messageReceiver == loggedInUser.email))) {
-                      if (messageSender == loggedInUser.email) {
-                        messageWidget = Container(
-                          margin: EdgeInsets.all(7),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(messageSender),
-                              SizedBox(height: 4),
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Colors.blueAccent,
+
+                    if (messageSender == loggedInUser.email) {
+                      messageWidget = Container(
+                        margin: EdgeInsets.all(7),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(messageSender),
+                            SizedBox(height: 4),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.blueAccent,
+                              ),
+                              child: Text(
+                                '$messageText',
+                                style: TextStyle(
+                                  fontSize: 20,
                                 ),
-                                child: Text(
-                                  '$messageText',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                  ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    } else if (messageSender != loggedInUser.email) {
+                      messageWidget = Container(
+                        margin: EdgeInsets.all(7),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(messageSender),
+                            SizedBox(height: 4),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.blueGrey,
+                              ),
+                              child: Text(
+                                '$messageText',
+                                style: TextStyle(
+                                  fontSize: 20,
                                 ),
-                              )
-                            ],
-                          ),
-                        );
-                      } else if (messageSender != loggedInUser.email) {
-                        messageWidget = Container(
-                          margin: EdgeInsets.all(7),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(messageSender),
-                              SizedBox(height: 4),
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Colors.blueGrey,
-                                ),
-                                child: Text(
-                                  '$messageText',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        );
-                      }
-                      messagesList.add(messageWidget);
+                              ),
+                            )
+                          ],
+                        ),
+                      );
                     }
+                    messagesList.add(messageWidget);
                   }
                   return ListView(
                     children: messagesList,
@@ -171,7 +161,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   textController.clear();
                   _firestore
                       .collection(
-                          'messagesFrom ${loggedInUser.email} to ${ChatScreen.friendEmail}')
+                          'messages of ${(ChatScreen.friendUsername.length + ChatScreen.myUsername.length)}')
                       .add({
                     'message': message,
                     'sender': loggedInUser.email,
