@@ -34,7 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   final _firestore = FirebaseFirestore.instance;
-  static String user = '';
 
   late String message;
   final textController = TextEditingController();
@@ -75,7 +74,10 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Container(
             color: Colors.white60,
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('messages').snapshots(),
+              stream: _firestore
+                  .collection(
+                      'messagesFrom ${loggedInUser.email} to ${ChatScreen.friendEmail}')
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final messages = snapshot.data!.docs.reversed;
@@ -167,7 +169,10 @@ class _ChatScreenState extends State<ChatScreen> {
               IconButton(
                 onPressed: () {
                   textController.clear();
-                  _firestore.collection('messages').add({
+                  _firestore
+                      .collection(
+                          'messagesFrom ${loggedInUser.email} to ${ChatScreen.friendEmail}')
+                      .add({
                     'message': message,
                     'sender': loggedInUser.email,
                     'receiver': ChatScreen.friendEmail
