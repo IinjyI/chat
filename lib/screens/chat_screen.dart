@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/custom_widgets.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:collection/collection.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -71,7 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection(
-                      'messages of ${(ChatScreen.friendUsername.length + ChatScreen.myUsername.length)}')
+                      'messages of ${(ChatScreen.friendUsername.codeUnits.sum + ChatScreen.myUsername.codeUnits.sum)}')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -82,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     final messageSender = message.get('sender');
                     late final messageWidget;
 
-                    if (messageSender == loggedInUser.email) {
+                    if (messageSender == ChatScreen.myUsername) {
                       messageWidget = Container(
                         margin: EdgeInsets.all(7),
                         child: Column(
@@ -106,7 +107,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         ),
                       );
-                    } else if (messageSender != loggedInUser.email) {
+                    } else if (messageSender != ChatScreen.myUsername) {
                       messageWidget = Container(
                         margin: EdgeInsets.all(7),
                         child: Column(
@@ -161,11 +162,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   textController.clear();
                   _firestore
                       .collection(
-                          'messages of ${(ChatScreen.friendUsername.length + ChatScreen.myUsername.length)}')
+                          'messages of ${(ChatScreen.friendUsername.codeUnits.sum + ChatScreen.myUsername.codeUnits.sum)}')
                       .add({
                     'message': message,
-                    'sender': loggedInUser.email,
-                    'receiver': ChatScreen.friendEmail
+                    'sender': ChatScreen.myUsername,
+                    'receiver': ChatScreen.friendUsername
                   });
                 },
                 icon: Icon(Icons.arrow_forward_outlined),
