@@ -30,7 +30,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final _auth = FirebaseAuth.instance;
   late final User loggedInUser;
   late final _firestore = FirebaseFirestore.instance;
-
+  late DateTime time;
   late String message;
   final textController = TextEditingController();
 
@@ -73,6 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
               stream: _firestore
                   .collection(
                       'messages of ${(ChatScreen.friendUsername.codeUnits.sum + ChatScreen.myUsername.codeUnits.sum)}')
+                  .orderBy('time', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -82,7 +83,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     final messageText = message.get('message');
                     final messageSender = message.get('sender');
                     late final messageWidget;
-
                     if (messageSender == ChatScreen.myUsername) {
                       messageWidget = Container(
                         margin: EdgeInsets.all(7),
@@ -154,6 +154,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   controller: textController,
                   onChanged: (value) {
                     message = value;
+                    time = DateTime.now();
                   },
                 ),
               ),
@@ -166,7 +167,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       .add({
                     'message': message,
                     'sender': ChatScreen.myUsername,
-                    'receiver': ChatScreen.friendUsername
+                    'receiver': ChatScreen.friendUsername,
+                    'time': time
                   });
                 },
                 icon: Icon(Icons.arrow_forward_outlined),
